@@ -1,34 +1,80 @@
 use leptos::prelude::*;
-use leptos_meta::*;
-use leptos_router::{components::*, path};
+use serde::{Deserialize, Serialize};
 
-// Modules
-mod components;
-mod pages;
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Post {
+    #[serde(rename = "userId")] 
+    pub user_id: i32,
+    pub id: i32,
+    pub title: String,
+    pub body: String,
+}
 
-// Top-Level pages
-use crate::pages::home::Home;
+async fn fetch_post(id: i32) -> Result<Post, String> {
+    let url = format!("https://jsonplaceholder.typicode.com/posts/{}", id);
+    
+    reqwest::get(&url)
+        .await
+        .map_err(|e| e.to_string())?
+        .json::<Post>()
+        .await
+        .map_err(|e| e.to_string())
+}
 
-/// An app router which renders the homepage and handles 404's
 #[component]
 pub fn App() -> impl IntoView {
-    // Provides context that manages stylesheets, titles, meta tags, etc.
-    provide_meta_context();
+    let (post_id, set_post_id) = signal(1);
+   let post_resource = LocalResource::new(move || {
+        let id = post_id.get();
+        async move {
+            fetch_post(id).await
+        }
+    });
 
     view! {
-        <Html attr:lang="en" attr:dir="ltr" attr:data-theme="light" />
+        <div class="p-5 font-sans">
+            <h1 class="text-2xl font-bold mb-4">"JSONPlaceholder Fetcher"</h1>
 
-        // sets the document title
-        <Title text="Welcome to Leptos CSR" />
+            <div class="flex gap-2 mb-4">
+                <button 
+                    class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+                    on:click=move |_| set_post_id.update(|n| if *n > 1 { *n -= 1 })
+                >
+                    "Previous Post"
+                </button>
+                <button 
+                    class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+                    on:click=move |_| set_post_id.update(|n| *n += 1)
+                >
+                    "Next Post"
+                </button>
+            </div>
 
-        // injects metadata in the <head> of the page
-        <Meta charset="UTF-8" />
-        <Meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <p class="mb-4">"Current ID: " {post_id}</p>
 
-        <Router>
-            <Routes fallback=|| view! { NotFound }>
-                <Route path=path!("/") view=Home />
-            </Routes>
-        </Router>
+            <Suspense fallback=move || view! { <p class="text-gray-500 animate-pulse">"Loading data..."</p> }>
+                {move || {
+                    post_resource.get().map(|data| {
+                        match data {
+                            Ok(post) => view! {
+                                <div class="border border-gray-300 p-6 rounded-lg shadow-md bg-white">
+                                    <h2 class="text-xl font-bold text-blue-600 mb-2 capitalize">{post.title}</h2>
+                                    <p class="text-gray-700 leading-relaxed">{post.body}</p>
+                                    <div class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400">
+                                        "User ID: " {post.user_id} " • Post ID: " {post.id}
+                                    </div>
+                                </div>
+                            }.into_any(),
+                            Err(e) => view! {
+                                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                                    <strong class="font-bold">"Error: "</strong>
+                                    <span class="block sm:inline">{e}</span>
+                                </div>
+                            }.into_any()
+                        }
+                    })
+                }}
+            </Suspense>
+        </div>
     }
 }
