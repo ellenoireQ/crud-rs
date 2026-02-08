@@ -23,8 +23,7 @@ pub fn Home() -> impl IntoView {
                 </ul>
             }
         }>
-
-            <div class="container">
+            <div class="w-full h-full flex flex-col justify-center items-center gap-8">
 
                 <picture>
                     <source
@@ -39,7 +38,7 @@ pub fn Home() -> impl IntoView {
                     />
                 </picture>
 
-                <h1>"Welcome to Leptos"</h1>
+                <h1 class="font-bold text-2xl">"Welcome to Leptos"</h1>
 
                 <div class="buttons">
                     <Button />
