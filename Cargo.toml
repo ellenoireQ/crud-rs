@@ -17,6 +17,14 @@ serde = "1.0.228"
 serde_json = "1.0.149"
 rand = {version="0.10.0"}
 getrandom = { version = "0.4.1", features = ["wasm_js"] }
+web-sys = { version = "0.3", features = [
+    "Document",
+    "Window",
+    "Element",
+    "HtmlCanvasElement",
+    "CanvasRenderingContext2d"
+],
+}
 
 # utils
 # strum = { version = "0.25", features = ["derive", "strum_macros"] }

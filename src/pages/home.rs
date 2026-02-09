@@ -2,6 +2,7 @@ use leptos::prelude::*;
 use crate::models::Product;
 use crate::components::product_form::ProductForm;
 use crate::components::product_list::ProductList;
+use crate::components::mandelbrot::Mandelbrot;
 
 #[component]
 pub fn Home() -> impl IntoView {
@@ -96,6 +97,9 @@ pub fn Home() -> impl IntoView {
                             on_delete=handle_delete
                         />
                     </div>
+                </div>
+                <div class="mt-10">
+                    <Mandelbrot />
                 </div>
             </div>
         </div>
