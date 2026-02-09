@@ -12,12 +12,21 @@ pub fn Home() -> impl IntoView {
     let (editing_product, set_editing_product) = signal::<Option<Product>>(None);
     let (show_form, set_show_form) = signal(false);
 
-    let handle_add = move |product: Product| {
+    let handle_add = move |mut product: Product| {
         set_products.update(|products| {
             if let Some(idx) = products.iter().position(|p| p.id == product.id) {
                 products[idx] = product.clone();
                 set_editing_product.set(None);
             } else {
+                let max_id = products.iter()
+                    .map(|p| p.id)
+                    .max()
+                    .unwrap_or(0); 
+                
+                let next_id = max_id + 1;
+                
+                product.id = next_id;
+                
                 products.push(product);
             }
         });

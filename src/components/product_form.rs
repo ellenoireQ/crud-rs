@@ -4,7 +4,8 @@ use crate::models::Product;
 #[component]
 pub fn ProductForm(
     #[prop(default = None)] initial_product: Option<Product>,
-    on_submit: impl Fn(Product) + 'static,
+    #[prop(into)]
+    on_submit: Callback<Product>,
 ) -> impl IntoView {
     let (name, set_name) = signal(initial_product.as_ref().map(|p| p.name.clone()).unwrap_or_default());
     let (description, set_description) = signal(initial_product.as_ref().map(|p| p.description.clone()).unwrap_or_default());
@@ -21,10 +22,7 @@ pub fn ProductForm(
         let new_id = if is_edit { 
             product_id 
         } else { 
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_millis() as u32
+            0
         };
         
         let product = Product::new(
@@ -35,7 +33,7 @@ pub fn ProductForm(
             stock_val,
         );
         
-        on_submit(product);
+        on_submit.run(product);
     };
 
     view! {
