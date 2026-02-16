@@ -22,6 +22,7 @@ To set up your project with this template, run
 cargo generate --git https://github.com/leptos-rs/start-trunk
 ```
 
+
 to generate your new project, then
 
 ```sh
